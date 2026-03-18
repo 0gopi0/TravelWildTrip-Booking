@@ -2,6 +2,11 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import mongoose from "mongoose";
+import dns from "dns";
+
+// Fix DNS resolution for MongoDB Atlas SRV records
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 // Load environment variables
 dotenv.config();
@@ -38,10 +43,20 @@ app.get("/api/health", (req, res) => {
 });
 
 // ========================
-// Start Server
+// Connect to MongoDB & Start Server
 // ========================
-app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}\n`);
-});
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("\n✅ MongoDB connected successfully!");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}\n`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection failed:", err.message);
+    process.exit(1);
+  });
