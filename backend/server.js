@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import dns from "dns";
+import userRoutes from "./routes/userRoutes.js";
 
 // Fix DNS resolution for MongoDB Atlas SRV records
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
@@ -41,6 +42,11 @@ app.get("/api/health", (req, res) => {
     uptime: `${Math.floor(process.uptime())}s`,
   });
 });
+
+// ========================
+// API Routes
+// ========================
+app.use("/api/users", userRoutes);
 
 // ========================
 // Connect to MongoDB & Start Server
